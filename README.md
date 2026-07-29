@@ -6,6 +6,7 @@
 
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TanStack Query](https://img.shields.io/badge/TanStack_Query-5.0-FF4154?style=for-the-badge&logo=reactquery&logoColor=white)](https://tanstack.com/query/latest)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 [![Deployment](https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
@@ -27,19 +28,17 @@
 | Category | Technologies |
 | :--- | :--- |
 | **Frontend Framework** | `React 19`, `TypeScript` |
-| **Styling & UI** | `Tailwind CSS`, `Lucide React` (Icons) |
-| **State & Data Fetching** | `TanStack React Query` |
+| **Styling & UI** | `Tailwind CSS`, `Lucide React` |
+| **State & Data Fetching** | `TanStack React Query (v5)` |
 | **Routing** | `React Router DOM v7` |
 | **HTTP & API Integration** | `Axios` |
-| **Data Visualization** | `Chart.js` |
-| **Form Handling & Validation** | `React Hook Form`, `Zod` |
+| **Data Visualization** | `Chart.js`, `React ChartJS 2` |
+| **Form Handling & Validation** | `React Hook Form`, `Zod`, `@hookform/resolvers` |
 | **Hosting & Deployment** | `Vercel` |
 
 </details>
+
 ---
-
-
-
 
 ## ⚡ Performance & SEO Benchmarks
 
