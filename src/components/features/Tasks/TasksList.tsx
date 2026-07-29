@@ -25,7 +25,6 @@ const TasksList = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Filter holati
   const [filters, setFilters] = useState<TaskFilters>({
     page: 1,
     pageSize: 10,
@@ -36,11 +35,10 @@ const TasksList = () => {
     sortOrder: "asc",
   });
 
-  // React Query - Tasks olish
   const { data, isLoading, error } = useQuery({
     queryKey: ["tasks", filters],
     queryFn: () => tasksApi.getAll(filters),
-    staleTime: 1000 * 60 * 5, // 5 daqiqa
+    staleTime: 1000 * 60 * 5,
   });
 
   const tasks = data?.data || [];
@@ -51,7 +49,6 @@ const TasksList = () => {
     hasPreviousPage: false,
   };
 
-  // Status update mutation
   const statusMutation = useMutation({
     mutationFn: ({
       id,
@@ -65,7 +62,6 @@ const TasksList = () => {
     },
   });
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => tasksApi.delete(id),
     onSuccess: () => {
@@ -73,22 +69,18 @@ const TasksList = () => {
     },
   });
 
-  // Qidiruv
   const handleSearch = (value: string) => {
     setFilters({ ...filters, search: value, page: 1 });
   };
 
-  // Filter o'zgartirish
   const handleFilterChange = (key: keyof TaskFilters, value: any) => {
     setFilters({ ...filters, [key]: value, page: 1 });
   };
 
-  // Sahifa o'zgartirish
   const handlePageChange = (newPage: number) => {
     setFilters({ ...filters, page: newPage });
   };
 
-  // Task statusini o'zgartirish
   const handleStatusChange = (
     id: string,
     status: "TODO" | "IN_PROGRESS" | "DONE",
@@ -96,13 +88,11 @@ const TasksList = () => {
     statusMutation.mutate({ id, status });
   };
 
-  // Task o'chirish
   const handleDelete = async (id: string) => {
     if (!window.confirm("Bu taskni o'chirmoqchimisiz?")) return;
     deleteMutation.mutate(id);
   };
 
-  // View details
   const handleViewDetails = (id: string) => {
     navigate(`/tasks/${id}`);
   };
@@ -146,12 +136,14 @@ const TasksList = () => {
   }
 
   return (
-    <div>
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">My tasks</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+            My tasks
+          </h1>
+          <p className="text-sm text-gray-500">
             Everything currently assigned to you.
           </p>
         </div>
@@ -161,58 +153,61 @@ const TasksList = () => {
               setEditingTask(null);
               setIsModalOpen(true);
             }}
-            className="bg-[#0f172b] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#1a2744] transition text-sm font-medium"
+            className="bg-[#0f172b] text-white px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#1a2744] transition text-sm font-medium whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
-            Add task
+            <span className="hidden xs:inline">Add task</span>
+            <span className="xs:hidden">Add</span>
           </button>
         )}
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex-1 min-w-[200px]">
+      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 border border-gray-100">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+          <div className="flex-1 min-w-[180px] sm:min-w-[200px]">
             <div className="relative">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search tasks by title or description…"
+                placeholder="Search tasks..."
                 value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
+                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
               />
             </div>
           </div>
 
-          <select
-            value={filters.status}
-            onChange={(e) => handleFilterChange("status", e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
-          >
-            <option value="ALL">All statuses</option>
-            <option value="TODO">To Do</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="DONE">Done</option>
-          </select>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange("status", e.target.value)}
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none bg-white min-w-[120px]"
+            >
+              <option value="ALL">All statuses</option>
+              <option value="TODO">To Do</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="DONE">Done</option>
+            </select>
 
-          <select
-            value={filters.priority}
-            onChange={(e) => handleFilterChange("priority", e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
-          >
-            <option value="ALL">All priorities</option>
-            <option value="LOW">Low</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HIGH">High</option>
-          </select>
+            <select
+              value={filters.priority}
+              onChange={(e) => handleFilterChange("priority", e.target.value)}
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none bg-white min-w-[120px]"
+            >
+              <option value="ALL">All priorities</option>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm flex items-center gap-2">
-          <AlertCircle className="w-4 h-4" />
+        <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
           {(error as any)?.response?.data?.error?.message ||
             "Xatolik yuz berdi"}
         </div>
@@ -221,27 +216,27 @@ const TasksList = () => {
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Task
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                   Priority
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                   Due date
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 {isAdmin && (
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Assigned to
                   </th>
                 )}
-                <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-right px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -260,47 +255,49 @@ const TasksList = () => {
                 tasks.map((task: Task) => (
                   <tr key={task.id} className="hover:bg-gray-50 transition">
                     <td
-                      className="px-6 py-4 cursor-pointer"
+                      className="px-4 sm:px-6 py-3 sm:py-4 cursor-pointer"
                       onClick={() => handleViewDetails(task.id)}
                     >
                       <div>
-                        <p className="text-sm font-medium text-gray-800">
+                        <p className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[250px]">
                           {task.title}
                         </p>
                         {task.description && (
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                          <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[180px] sm:max-w-[250px]">
                             {task.description}
                           </p>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}
+                        className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${getPriorityColor(task.priority)}`}
                       >
                         {task.priority}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                        <Calendar className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                         <span
                           className={`text-sm ${isOverdue(task.dueDate) && task.status !== "DONE" ? "text-red-600 font-medium" : "text-gray-600"}`}
                         >
                           {formatDate(task.dueDate)}
-                          {isOverdue(task.dueDate) &&
-                            task.status !== "DONE" &&
-                            " (overdue)"}
                         </span>
                       </div>
+                      {isOverdue(task.dueDate) && task.status !== "DONE" && (
+                        <span className="text-xs text-red-600 block">
+                          Overdue
+                        </span>
+                      )}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
                       <select
                         value={task.status}
                         onChange={(e) =>
                           handleStatusChange(task.id, e.target.value as any)
                         }
-                        className={`text-xs px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-[#0f172b] ${getStatusColor(task.status)}`}
+                        className={`text-xs px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-[#0f172b] ${getStatusColor(task.status)} w-full min-w-[90px] sm:w-auto`}
                       >
                         <option value="TODO">To Do</option>
                         <option value="IN_PROGRESS">In Progress</option>
@@ -308,18 +305,18 @@ const TasksList = () => {
                       </select>
                     </td>
                     {isAdmin && (
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-600 hidden lg:table-cell">
                         {task.assignedTo ? (
                           <div className="flex items-center gap-2">
                             <img
                               src={
                                 task.assignedTo.avatar ||
-                                `https://ui-avatars.com/api/?name=${task.assignedTo.firstName}+${task.assignedTo.lastName}&background=0f172b&color=fff`
+                                `https://ui-avatars.com/api/?name=${task.assignedTo.firstName}+${task.assignedTo.lastName}&background=0f172b&color=fff&size=24`
                               }
                               alt={task.assignedTo.firstName}
-                              className="w-6 h-6 rounded-full"
+                              className="w-6 h-6 rounded-full flex-shrink-0"
                             />
-                            <span>
+                            <span className="truncate max-w-[100px]">
                               {task.assignedTo.firstName}{" "}
                               {task.assignedTo.lastName}
                             </span>
@@ -329,7 +326,7 @@ const TasksList = () => {
                         )}
                       </td>
                     )}
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
                       <div className="relative">
                         <button
                           onClick={(e) => {
@@ -396,8 +393,8 @@ const TasksList = () => {
 
         {/* Pagination */}
         {tasks.length > 0 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-            <p className="text-sm text-gray-500">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-gray-100">
+            <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left order-2 sm:order-1">
               Showing{" "}
               {Math.min(
                 (filters.page! - 1) * filters.pageSize! + 1,
@@ -406,7 +403,7 @@ const TasksList = () => {
               –{Math.min(filters.page! * filters.pageSize!, meta.total)} of{" "}
               {meta.total} tasks
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 order-1 sm:order-2">
               <button
                 onClick={() => handlePageChange(filters.page! - 1)}
                 disabled={!meta.hasPreviousPage}
@@ -414,7 +411,7 @@ const TasksList = () => {
               >
                 <ChevronLeft className="w-4 h-4 text-gray-600" />
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 whitespace-nowrap">
                 Page {filters.page} of {meta.totalPages}
               </span>
               <button

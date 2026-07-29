@@ -27,7 +27,6 @@ const EmployeesList = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Filter holati
   const [filters, setFilters] = useState<EmployeeFilters>({
     page: 1,
     pageSize: 10,
@@ -36,11 +35,10 @@ const EmployeesList = () => {
     status: "ALL",
   });
 
-  // React Query - Employees olish
   const { data, isLoading, error } = useQuery({
     queryKey: ["employees", filters],
     queryFn: () => employeesApi.getAll(filters),
-    staleTime: 1000 * 60 * 5, // 5 daqiqa
+    staleTime: 1000 * 60 * 5,
   });
 
   const employees = data?.data || [];
@@ -51,7 +49,6 @@ const EmployeesList = () => {
     hasPreviousPage: false,
   };
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => employeesApi.delete(id),
     onSuccess: () => {
@@ -59,28 +56,23 @@ const EmployeesList = () => {
     },
   });
 
-  // Qidiruv
   const handleSearch = (value: string) => {
     setFilters({ ...filters, search: value, page: 1 });
   };
 
-  // Filter o'zgartirish
   const handleFilterChange = (key: keyof EmployeeFilters, value: any) => {
     setFilters({ ...filters, [key]: value, page: 1 });
   };
 
-  // Sahifa o'zgartirish
   const handlePageChange = (newPage: number) => {
     setFilters({ ...filters, page: newPage });
   };
 
-  // Xodim o'chirish
   const handleDelete = async (id: string) => {
     if (!window.confirm("Bu xodimni o'chirmoqchimisiz?")) return;
     deleteMutation.mutate(id);
   };
 
-  // View details
   const handleViewDetails = (id: string) => {
     navigate(`/employees/${id}`);
   };
@@ -117,12 +109,14 @@ const EmployeesList = () => {
   }
 
   return (
-    <div>
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Employees</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+            Employees
+          </h1>
+          <p className="text-sm text-gray-500">
             Manage your team members, their roles and access.
           </p>
         </div>
@@ -131,55 +125,58 @@ const EmployeesList = () => {
             setEditingEmployee(null);
             setIsModalOpen(true);
           }}
-          className="bg-[#0f172b] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#1a2744] transition text-sm font-medium"
+          className="bg-[#0f172b] text-white px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#1a2744] transition text-sm font-medium whitespace-nowrap"
         >
           <Plus className="w-4 h-4" />
-          Add employee
+          <span className="hidden xs:inline">Add employee</span>
+          <span className="xs:hidden">Add</span>
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex-1 min-w-[200px]">
+      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 border border-gray-100">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+          <div className="flex-1 min-w-[180px] sm:min-w-[200px]">
             <div className="relative">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search by name, email or position…"
+                placeholder="Search employees..."
                 value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
+                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
               />
             </div>
           </div>
 
-          <select
-            value={filters.role}
-            onChange={(e) => handleFilterChange("role", e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
-          >
-            <option value="ALL">All roles</option>
-            <option value="ADMIN">Admin</option>
-            <option value="EMPLOYEE">Employee</option>
-          </select>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            <select
+              value={filters.role}
+              onChange={(e) => handleFilterChange("role", e.target.value)}
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none bg-white min-w-[120px]"
+            >
+              <option value="ALL">All roles</option>
+              <option value="ADMIN">Admin</option>
+              <option value="EMPLOYEE">Employee</option>
+            </select>
 
-          <select
-            value={filters.status}
-            onChange={(e) => handleFilterChange("status", e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
-          >
-            <option value="ALL">All statuses</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-            <option value="ON_LEAVE">On Leave</option>
-          </select>
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange("status", e.target.value)}
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none bg-white min-w-[120px]"
+            >
+              <option value="ALL">All statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+              <option value="ON_LEAVE">On Leave</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
+        <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
           {(error as any)?.response?.data?.error?.message ||
             "Xatolik yuz berdi"}
         </div>
@@ -188,25 +185,25 @@ const EmployeesList = () => {
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Employee
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                   Position
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                   Role
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                   Joined
                 </th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-right px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -225,45 +222,47 @@ const EmployeesList = () => {
                     className="hover:bg-gray-50 transition cursor-pointer"
                     onClick={() => handleViewDetails(emp.id)}
                   >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <img
                           src={
                             emp.avatar ||
                             `https://ui-avatars.com/api/?name=${emp.firstName}+${emp.lastName}&background=0f172b&color=fff`
                           }
                           alt={emp.firstName}
-                          className="w-9 h-9 rounded-full"
+                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex-shrink-0"
                         />
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-800 truncate">
                             {emp.firstName} {emp.lastName}
                           </p>
-                          <p className="text-xs text-gray-500">{emp.email}</p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {emp.email}
+                          </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-600 hidden sm:table-cell truncate max-w-[120px]">
                       {emp.position}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${getRoleColor(emp.role)}`}
+                        className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${getRoleColor(emp.role)}`}
                       >
                         {emp.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${getStatusColor(emp.status)}`}
+                        className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${getStatusColor(emp.status)}`}
                       >
                         {emp.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500 hidden lg:table-cell whitespace-nowrap">
                       {formatDate(emp.createdAt)}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
                       <div className="relative">
                         <button
                           onClick={(e) => {
@@ -329,8 +328,8 @@ const EmployeesList = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-          <p className="text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left order-2 sm:order-1">
             Showing{" "}
             {employees.length > 0
               ? (filters.page! - 1) * filters.pageSize! + 1
@@ -338,7 +337,7 @@ const EmployeesList = () => {
             –{Math.min(filters.page! * filters.pageSize!, meta.total)} of{" "}
             {meta.total} employees
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 order-1 sm:order-2">
             <button
               onClick={() => handlePageChange(filters.page! - 1)}
               disabled={!meta.hasPreviousPage}
@@ -346,7 +345,7 @@ const EmployeesList = () => {
             >
               <ChevronLeft className="w-4 h-4 text-gray-600" />
             </button>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-600 whitespace-nowrap">
               Page {filters.page} of {meta.totalPages}
             </span>
             <button
