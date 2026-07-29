@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus,
   Search,
@@ -19,14 +20,12 @@ import EmployeeModal from "./EmployeeModal";
 import { useAuth } from "../../../ctx/AuthContext";
 
 const EmployeesList = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Filter holati
   const [filters, setFilters] = useState<EmployeeFilters>({
@@ -37,32 +36,28 @@ const EmployeesList = () => {
     status: "ALL",
   });
 
-  const [meta, setMeta] = useState({
+  // React Query - Employees olish
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["employees", filters],
+    queryFn: () => employeesApi.getAll(filters),
+    staleTime: 1000 * 60 * 5, // 5 daqiqa
+  });
+
+  const employees = data?.data || [];
+  const meta = data?.meta || {
     total: 0,
     totalPages: 0,
     hasNextPage: false,
     hasPreviousPage: false,
-  });
-
-  // Xodimlarni yuklash
-  const fetchEmployees = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await employeesApi.getAll(filters);
-      setEmployees(response.data);
-      setMeta(response.meta);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || "Xatolik yuz berdi");
-    } finally {
-      setLoading(false);
-    }
   };
 
-  useEffect(() => {
-    fetchEmployees();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => employeesApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+    },
+  });
 
   // Qidiruv
   const handleSearch = (value: string) => {
@@ -82,12 +77,7 @@ const EmployeesList = () => {
   // Xodim o'chirish
   const handleDelete = async (id: string) => {
     if (!window.confirm("Bu xodimni o'chirmoqchimisiz?")) return;
-    try {
-      await employeesApi.delete(id);
-      fetchEmployees();
-    } catch (err: any) {
-      alert(err.response?.data?.error?.message || "O'chirishda xatolik");
-    }
+    deleteMutation.mutate(id);
   };
 
   // View details
@@ -118,7 +108,7 @@ const EmployeesList = () => {
     });
   };
 
-  if (loading && employees.length === 0) {
+  if (isLoading && employees.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-500">Yuklanmoqda...</div>
@@ -190,7 +180,8 @@ const EmployeesList = () => {
       {/* Error */}
       {error && (
         <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
-          {error}
+          {(error as any)?.response?.data?.error?.message ||
+            "Xatolik yuz berdi"}
         </div>
       )}
 
@@ -228,7 +219,7 @@ const EmployeesList = () => {
                   </td>
                 </tr>
               ) : (
-                employees.map((emp) => (
+                employees.map((emp: Employee) => (
                   <tr
                     key={emp.id}
                     className="hover:bg-gray-50 transition cursor-pointer"
@@ -376,7 +367,9 @@ const EmployeesList = () => {
           setIsModalOpen(false);
           setEditingEmployee(null);
         }}
-        onSuccess={fetchEmployees}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["employees"] });
+        }}
         employee={editingEmployee}
       />
     </div>
