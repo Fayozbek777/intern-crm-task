@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus,
   Search,
@@ -17,14 +18,12 @@ import { useAuth } from "../../../ctx/AuthContext";
 import TaskModal from "./TaskModal";
 
 const TasksList = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Filter holati
   const [filters, setFilters] = useState<TaskFilters>({
@@ -37,32 +36,42 @@ const TasksList = () => {
     sortOrder: "asc",
   });
 
-  const [meta, setMeta] = useState({
+  // React Query - Tasks olish
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["tasks", filters],
+    queryFn: () => tasksApi.getAll(filters),
+    staleTime: 1000 * 60 * 5, // 5 daqiqa
+  });
+
+  const tasks = data?.data || [];
+  const meta = data?.meta || {
     total: 0,
     totalPages: 0,
     hasNextPage: false,
     hasPreviousPage: false,
-  });
-
-  // Tasklarni yuklash
-  const fetchTasks = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await tasksApi.getAll(filters);
-      setTasks(response.data);
-      setMeta(response.meta);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || "Xatolik yuz berdi");
-    } finally {
-      setLoading(false);
-    }
   };
 
-  useEffect(() => {
-    fetchTasks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  // Status update mutation
+  const statusMutation = useMutation({
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: "TODO" | "IN_PROGRESS" | "DONE";
+    }) => tasksApi.updateStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => tasksApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
 
   // Qidiruv
   const handleSearch = (value: string) => {
@@ -80,29 +89,17 @@ const TasksList = () => {
   };
 
   // Task statusini o'zgartirish
-  const handleStatusChange = async (
+  const handleStatusChange = (
     id: string,
     status: "TODO" | "IN_PROGRESS" | "DONE",
   ) => {
-    try {
-      await tasksApi.updateStatus(id, status);
-      fetchTasks();
-    } catch (err: any) {
-      alert(
-        err.response?.data?.error?.message || "Status o'zgartirishda xatolik",
-      );
-    }
+    statusMutation.mutate({ id, status });
   };
 
   // Task o'chirish
   const handleDelete = async (id: string) => {
     if (!window.confirm("Bu taskni o'chirmoqchimisiz?")) return;
-    try {
-      await tasksApi.delete(id);
-      fetchTasks();
-    } catch (err: any) {
-      alert(err.response?.data?.error?.message || "O'chirishda xatolik");
-    }
+    deleteMutation.mutate(id);
   };
 
   // View details
@@ -140,7 +137,7 @@ const TasksList = () => {
     return new Date(dueDate) < new Date();
   };
 
-  if (loading && tasks.length === 0) {
+  if (isLoading && tasks.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-500">Yuklanmoqda...</div>
@@ -216,7 +213,8 @@ const TasksList = () => {
       {error && (
         <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm flex items-center gap-2">
           <AlertCircle className="w-4 h-4" />
-          {error}
+          {(error as any)?.response?.data?.error?.message ||
+            "Xatolik yuz berdi"}
         </div>
       )}
 
@@ -259,7 +257,7 @@ const TasksList = () => {
                   </td>
                 </tr>
               ) : (
-                tasks.map((task) => (
+                tasks.map((task: Task) => (
                   <tr key={task.id} className="hover:bg-gray-50 transition">
                     <td
                       className="px-6 py-4 cursor-pointer"
@@ -438,7 +436,9 @@ const TasksList = () => {
           setIsModalOpen(false);
           setEditingTask(null);
         }}
-        onSuccess={fetchTasks}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["tasks"] });
+        }}
         task={editingTask}
       />
     </div>
