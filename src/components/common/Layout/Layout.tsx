@@ -21,14 +21,14 @@ const Layout = () => {
         <Sidebar />
         <main
           className={`
-          flex-1 
-          transition-all duration-300 ease-in-out
-          ${isMobile ? "p-3 sm:p-4" : "p-4 md:p-6"}
-          bg-white 
-          ${isMobile ? "m-2 sm:m-3" : "m-3 md:m-4 lg:m-6"}
-          rounded-xl shadow-sm
-          min-h-[calc(100vh-80px)]
-        `}
+            flex-1 
+            transition-all duration-300 ease-in-out
+            ${isMobile ? "p-2 sm:p-3" : "p-3 md:p-4 lg:p-6"}
+            bg-white 
+            ${isMobile ? "m-1 sm:m-2" : "m-2 md:m-3 lg:m-4 xl:m-6"}
+            rounded-xl shadow-sm
+            min-h-[calc(100vh-80px)]
+          `}
         >
           <div className="max-w-7xl mx-auto">
             <Outlet />
