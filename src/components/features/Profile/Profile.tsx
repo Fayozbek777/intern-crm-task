@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  User,
   Mail,
   Phone,
   Briefcase,
@@ -10,33 +10,94 @@ import {
   EyeOff,
   CheckCircle,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
+import {
+  profileApi,
+  Profile as ProfileType,
+  UpdateProfileData,
+  ChangePasswordData,
+} from "../../../api/endpoints/profile.api";
+import { useAuth } from "../../../ctx/AuthContext";
 
-const Profile = () => {
+const ProfilePage = () => {
+  const { user, updateUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  const [profile, setProfile] = useState<ProfileType | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [profileSuccess, setProfileSuccess] = useState("");
+  const [profileError, setProfileError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-  // Profil ma'lumotlari
-  const [profile, setProfile] = useState({
-    firstName: "Bo",
-    lastName: "Smith",
-    email: "admin@corpcrm.dev",
-    position: "Head of Operations",
-    phone: "+1 555-0101",
-    avatar: "https://i.pravatar.cc/150?u=1",
-  });
-
-  // Parol o'zgartirish
-  const [passwordData, setPasswordData] = useState({
+  const [passwordData, setPasswordData] = useState<ChangePasswordData>({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["profile"],
+    queryFn: () => profileApi.getProfile(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  useEffect(() => {
+    if (data) {
+      setProfile(data);
+    }
+  }, [data]);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: UpdateProfileData) => profileApi.updateProfile(data),
+    onSuccess: (data) => {
+      setProfile(data);
+      updateUser(data);
+      setProfileSuccess("Profile updated successfully!");
+      setProfileError("");
+      setTimeout(() => setProfileSuccess(""), 3000);
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: (err: any) => {
+      setProfileError(
+        err.response?.data?.error?.message || "Failed to update profile",
+      );
+      setProfileSuccess("");
+      setTimeout(() => setProfileError(""), 3000);
+    },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: (data: ChangePasswordData) => profileApi.changePassword(data),
+    onSuccess: () => {
+      setPasswordSuccess("Password changed successfully!");
+      setPasswordError("");
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setTimeout(() => setPasswordSuccess(""), 3000);
+    },
+    onError: (err: any) => {
+      const response = err.response?.data;
+      if (response?.error?.fieldErrors) {
+        setPasswordError(response.error.message || "Validation error");
+      } else {
+        setPasswordError(
+          response?.error?.message || "Failed to change password",
+        );
+      }
+      setPasswordSuccess("");
+      setTimeout(() => setPasswordError(""), 3000);
+    },
+  });
+
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!profile) return;
     setProfile({
       ...profile,
       [e.target.name]: e.target.value,
@@ -52,30 +113,58 @@ const Profile = () => {
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessMessage("Profile updated successfully!");
-    setErrorMessage("");
-    setTimeout(() => setSuccessMessage(""), 3000);
+    if (!profile) return;
+
+    const updateData: UpdateProfileData = {
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      position: profile.position,
+      phone: profile.phone || "",
+      avatar: profile.avatar || "",
+    };
+
+    updateProfileMutation.mutate(updateData);
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setErrorMessage("Passwords do not match");
+      setPasswordError("Passwords do not match");
+      setTimeout(() => setPasswordError(""), 3000);
       return;
     }
+
     if (passwordData.newPassword.length < 8) {
-      setErrorMessage("Password must be at least 8 characters");
+      setPasswordError("Password must be at least 8 characters");
+      setTimeout(() => setPasswordError(""), 3000);
       return;
     }
-    setSuccessMessage("Password changed successfully!");
-    setErrorMessage("");
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setTimeout(() => setSuccessMessage(""), 3000);
+
+    changePasswordMutation.mutate(passwordData);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="w-8 h-8 text-[#0f172b] animate-spin" />
+          <span className="text-sm text-gray-500">Loading profile...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
+          {(error as any)?.response?.data?.error?.message ||
+            "Failed to load profile"}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl">
@@ -94,7 +183,6 @@ const Profile = () => {
         </p>
 
         <form onSubmit={handleProfileSubmit}>
-          {/* Email - readonly */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -114,7 +202,6 @@ const Profile = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* First name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 First name <span className="text-red-500">*</span>
@@ -128,8 +215,6 @@ const Profile = () => {
                 required
               />
             </div>
-
-            {/* Last name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Last name <span className="text-red-500">*</span>
@@ -145,7 +230,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Position */}
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Position <span className="text-red-500">*</span>
@@ -163,7 +247,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Phone */}
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Phone
@@ -173,7 +256,7 @@ const Profile = () => {
               <input
                 type="text"
                 name="phone"
-                value={profile.phone}
+                value={profile.phone || ""}
                 onChange={handleProfileChange}
                 className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
                 placeholder="+1 555-0101"
@@ -181,7 +264,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Avatar URL */}
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Avatar URL
@@ -189,7 +271,7 @@ const Profile = () => {
             <input
               type="text"
               name="avatar"
-              value={profile.avatar}
+              value={profile.avatar || ""}
               onChange={handleProfileChange}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0f172b] focus:border-transparent outline-none"
               placeholder="https://i.pravatar.cc/150?u=1"
@@ -199,14 +281,31 @@ const Profile = () => {
             </p>
           </div>
 
-          {/* Save button */}
+          {profileSuccess && (
+            <div className="mt-4 bg-green-50 text-green-600 p-3 rounded-lg text-sm flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              {profileSuccess}
+            </div>
+          )}
+          {profileError && (
+            <div className="mt-4 bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {profileError}
+            </div>
+          )}
+
           <div className="mt-6">
             <button
               type="submit"
-              className="bg-[#0f172b] text-white px-6 py-2 rounded-lg flex items-center gap-2 hover:bg-[#1a2744] transition text-sm font-medium"
+              disabled={updateProfileMutation.isPending}
+              className="bg-[#0f172b] text-white px-6 py-2 rounded-lg flex items-center gap-2 hover:bg-[#1a2744] transition text-sm font-medium disabled:opacity-50"
             >
-              <Save className="w-4 h-4" />
-              Save changes
+              {updateProfileMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {updateProfileMutation.isPending ? "Saving..." : "Save changes"}
             </button>
           </div>
         </form>
@@ -220,7 +319,6 @@ const Profile = () => {
         </p>
 
         <form onSubmit={handlePasswordSubmit}>
-          {/* Current password */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Current password <span className="text-red-500">*</span>
@@ -250,7 +348,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* New password */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               New password <span className="text-red-500">*</span>
@@ -283,7 +380,6 @@ const Profile = () => {
             </p>
           </div>
 
-          {/* Confirm password */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Confirm new password <span className="text-red-500">*</span>
@@ -313,27 +409,32 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Messages */}
-          {successMessage && (
+          {passwordSuccess && (
             <div className="bg-green-50 text-green-600 p-3 rounded-lg mb-4 text-sm flex items-center gap-2">
               <CheckCircle className="w-4 h-4" />
-              {successMessage}
+              {passwordSuccess}
             </div>
           )}
-          {errorMessage && (
+          {passwordError && (
             <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
-              {errorMessage}
+              {passwordError}
             </div>
           )}
 
-          {/* Change password button */}
           <button
             type="submit"
-            className="bg-[#0f172b] text-white px-6 py-2 rounded-lg flex items-center gap-2 hover:bg-[#1a2744] transition text-sm font-medium"
+            disabled={changePasswordMutation.isPending}
+            className="bg-[#0f172b] text-white px-6 py-2 rounded-lg flex items-center gap-2 hover:bg-[#1a2744] transition text-sm font-medium disabled:opacity-50"
           >
-            <Lock className="w-4 h-4" />
-            Change password
+            {changePasswordMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Lock className="w-4 h-4" />
+            )}
+            {changePasswordMutation.isPending
+              ? "Changing..."
+              : "Change password"}
           </button>
         </form>
       </div>
@@ -341,4 +442,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfilePage;
