@@ -44,9 +44,10 @@ export const employeesApi = {
   },
 
   // Bitta xodimni olish
+  // getById metodini yangilash
   getById: async (id: string) => {
     const response = await api.get(`/employees/${id}`);
-    return response.data.data;
+    return response.data.data; // taskStats bilan birga keladi
   },
 
   // Xodim yaratish

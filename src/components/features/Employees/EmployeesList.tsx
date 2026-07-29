@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plus,
   Search,
-  Filter,
-  ChevronDown,
   MoreVertical,
+  Eye,
+  Edit,
+  Trash2,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -13,7 +15,8 @@ import {
   Employee,
   EmployeeFilters,
 } from "../../../api/endpoints/employees.api";
-import EmployeeModal from "./EmployeesModal";
+import EmployeeModal from "./EmployeeModal";
+import { useAuth } from "../../../ctx/AuthContext";
 
 const EmployeesList = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -21,6 +24,9 @@ const EmployeesList = () => {
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
 
   // Filter holati
   const [filters, setFilters] = useState<EmployeeFilters>({
@@ -55,9 +61,10 @@ const EmployeesList = () => {
 
   useEffect(() => {
     fetchEmployees();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  // Qidiruv (debounce bilan)
+  // Qidiruv
   const handleSearch = (value: string) => {
     setFilters({ ...filters, search: value, page: 1 });
   };
@@ -77,13 +84,17 @@ const EmployeesList = () => {
     if (!window.confirm("Bu xodimni o'chirmoqchimisiz?")) return;
     try {
       await employeesApi.delete(id);
-      fetchEmployees(); // Ro'yxatni yangilash
+      fetchEmployees();
     } catch (err: any) {
       alert(err.response?.data?.error?.message || "O'chirishda xatolik");
     }
   };
 
-  // Status ranglari
+  // View details
+  const handleViewDetails = (id: string) => {
+    navigate(`/employees/${id}`);
+  };
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       ACTIVE: "bg-green-100 text-green-700",
@@ -93,11 +104,18 @@ const EmployeesList = () => {
     return colors[status] || "bg-gray-100 text-gray-700";
   };
 
-  // Role ranglari
   const getRoleColor = (role: string) => {
     return role === "ADMIN"
       ? "bg-purple-100 text-purple-700"
       : "bg-blue-100 text-blue-700";
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   if (loading && employees.length === 0) {
@@ -133,7 +151,6 @@ const EmployeesList = () => {
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-6">
         <div className="flex flex-wrap items-center gap-4">
-          {/* Search */}
           <div className="flex-1 min-w-[200px]">
             <div className="relative">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -147,7 +164,6 @@ const EmployeesList = () => {
             </div>
           </div>
 
-          {/* Role Filter */}
           <select
             value={filters.role}
             onChange={(e) => handleFilterChange("role", e.target.value)}
@@ -158,7 +174,6 @@ const EmployeesList = () => {
             <option value="EMPLOYEE">Employee</option>
           </select>
 
-          {/* Status Filter */}
           <select
             value={filters.status}
             onChange={(e) => handleFilterChange("status", e.target.value)}
@@ -214,7 +229,11 @@ const EmployeesList = () => {
                 </tr>
               ) : (
                 employees.map((emp) => (
-                  <tr key={emp.id} className="hover:bg-gray-50 transition">
+                  <tr
+                    key={emp.id}
+                    className="hover:bg-gray-50 transition cursor-pointer"
+                    onClick={() => handleViewDetails(emp.id)}
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <img
@@ -251,25 +270,64 @@ const EmployeesList = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(emp.createdAt).toLocaleDateString()}
+                      {formatDate(emp.createdAt)}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="relative">
                         <button
-                          onClick={() => {
-                            setEditingEmployee(emp);
-                            setIsModalOpen(true);
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId(
+                              openMenuId === emp.id ? null : emp.id,
+                            );
                           }}
-                          className="text-sm text-blue-600 hover:text-blue-800"
+                          className="p-1 hover:bg-gray-100 rounded transition"
                         >
-                          Edit
+                          <MoreVertical className="w-4 h-4 text-gray-400" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(emp.id)}
-                          className="text-sm text-red-600 hover:text-red-800"
-                        >
-                          Delete
-                        </button>
+
+                        {openMenuId === emp.id && (
+                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 text-left">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewDetails(emp.id);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+                            >
+                              <Eye className="w-4 h-4 text-gray-400" />
+                              View details
+                            </button>
+                            {isAdmin && (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingEmployee(emp);
+                                    setIsModalOpen(true);
+                                    setOpenMenuId(null);
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+                                >
+                                  <Edit className="w-4 h-4 text-blue-500" />
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(emp.id);
+                                    setOpenMenuId(null);
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>

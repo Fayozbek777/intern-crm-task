@@ -1,4 +1,4 @@
-// API dan keladigan xodim ma'lumotlari
+// Employee tipiga taskStats qo'shamiz
 export interface Employee {
   id: string;
   firstName: string;
@@ -11,42 +11,11 @@ export interface Employee {
   status: "ACTIVE" | "INACTIVE" | "ON_LEAVE";
   createdAt: string;
   updatedAt: string;
-}
-
-// Xodim yaratish uchun ma'lumotlar
-export interface CreateEmployeeData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  position: string;
-  phone?: string;
-  avatar?: string;
-  role?: "EMPLOYEE" | "ADMIN";
-  status?: "ACTIVE" | "INACTIVE" | "ON_LEAVE";
-}
-
-// Filter parametrlari
-export interface EmployeeFilters {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-  role?: "ADMIN" | "EMPLOYEE" | "ALL";
-  status?: "ACTIVE" | "INACTIVE" | "ON_LEAVE" | "ALL";
-  sortBy?: "createdAt" | "firstName" | "lastName" | "email";
-  sortOrder?: "asc" | "desc";
-}
-
-// API dan keladigan response
-export interface EmployeeResponse {
-  success: boolean;
-  data: Employee[];
-  meta: {
-    page: number;
-    pageSize: number;
+  taskStats?: {
     total: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
+    todo: number;
+    inProgress: number;
+    done: number;
+    overdue: number;
   };
 }
