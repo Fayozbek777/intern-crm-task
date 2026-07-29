@@ -1,6 +1,5 @@
 import { api } from "../Clients/client";
 
-// Task turlari
 export interface Task {
   id: string;
   title: string;
@@ -53,37 +52,31 @@ export interface UpdateTaskData extends Partial<CreateTaskData> {
 }
 
 export const tasksApi = {
-  // Barcha tasklarni olish
   getAll: async (params?: TaskFilters) => {
     const response = await api.get("/tasks", { params });
     return response.data;
   },
 
-  // Bitta taskni olish
   getById: async (id: string) => {
     const response = await api.get(`/tasks/${id}`);
     return response.data.data;
   },
 
-  // Task yaratish
   create: async (data: CreateTaskData) => {
     const response = await api.post("/tasks", data);
     return response.data.data;
   },
 
-  // Taskni tahrirlash
   update: async (id: string, data: UpdateTaskData) => {
     const response = await api.put(`/tasks/${id}`, data);
     return response.data.data;
   },
 
-  // Task statusini o'zgartirish
   updateStatus: async (id: string, status: "TODO" | "IN_PROGRESS" | "DONE") => {
     const response = await api.patch(`/tasks/${id}/status`, { status });
     return response.data.data;
   },
 
-  // Taskni o'chirish
   delete: async (id: string) => {
     const response = await api.delete(`/tasks/${id}`);
     return response.data.data;

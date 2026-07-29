@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Vercel da /api ishlatamiz
 const API_URL = process.env.REACT_APP_API_URL || "/api";
 
 export const api = axios.create({

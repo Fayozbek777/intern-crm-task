@@ -54,14 +54,18 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Yuklanmoqda...</div>
+        <div className="flex items-center gap-2 text-gray-500 text-sm">
+          <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin" />
+          Yuklanmoqda...
+        </div>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
+      <div className="flex items-center justify-center gap-2 bg-red-50 text-red-600 p-4 rounded-lg text-center text-sm">
+        <AlertCircle className="w-4 h-4 shrink-0" />
         {(error as any)?.response?.data?.error?.message || "Xatolik yuz berdi"}
       </div>
     );
@@ -167,135 +171,148 @@ const Dashboard = () => {
       stats.activeTasks + stats.completedTasks + stats.pendingTasks;
 
     return (
-      <div>
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-0">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-gray-500 text-sm">
+        <div className="mb-5 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+            Dashboard
+          </h1>
+          <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
             Here is what is happening across your organisation today.
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Total employees</p>
-                <p className="text-2xl font-bold text-gray-800">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-3.5 sm:p-4 border border-gray-100 transition-shadow hover:shadow-md">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-gray-500 truncate">
+                  Total employees
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">
                   {stats.totalEmployees}
                 </p>
               </div>
-              <div className="bg-blue-500 p-2 rounded-lg text-white">
-                <Users className="w-5 h-5" />
+              <div className="bg-blue-500 p-2 rounded-lg text-white shrink-0">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Active tasks</p>
-                <p className="text-2xl font-bold text-gray-800">
+          <div className="bg-white rounded-lg shadow-sm p-3.5 sm:p-4 border border-gray-100 transition-shadow hover:shadow-md">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-gray-500 truncate">
+                  Active tasks
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">
                   {stats.activeTasks}
                 </p>
               </div>
-              <div className="bg-green-500 p-2 rounded-lg text-white">
-                <CheckCircle className="w-5 h-5" />
+              <div className="bg-green-500 p-2 rounded-lg text-white shrink-0">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Completed tasks</p>
-                <p className="text-2xl font-bold text-gray-800">
+          <div className="bg-white rounded-lg shadow-sm p-3.5 sm:p-4 border border-gray-100 transition-shadow hover:shadow-md">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-gray-500 truncate">
+                  Completed tasks
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">
                   {stats.completedTasks}
                 </p>
               </div>
-              <div className="bg-purple-500 p-2 rounded-lg text-white">
-                <TrendingUp className="w-5 h-5" />
+              <div className="bg-purple-500 p-2 rounded-lg text-white shrink-0">
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Pending tasks</p>
-                <p className="text-2xl font-bold text-gray-800">
+          <div className="bg-white rounded-lg shadow-sm p-3.5 sm:p-4 border border-gray-100 transition-shadow hover:shadow-md">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-gray-500 truncate">
+                  Pending tasks
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-800">
                   {stats.pendingTasks}
                 </p>
                 {stats.overdueTasks > 0 && (
-                  <p className="text-xs text-red-600">
+                  <p className="text-[11px] sm:text-xs text-red-600 flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
                     {stats.overdueTasks} overdue
                   </p>
                 )}
               </div>
-              <div className="bg-yellow-500 p-2 rounded-lg text-white">
-                <Clock className="w-5 h-5" />
+              <div className="bg-yellow-500 p-2 rounded-lg text-white shrink-0">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Task Activity Chart */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">
-              Task Activity
-            </h2>
-            <span className="text-sm text-gray-500">
-              Over the last seven days, {totalTasks} tasks were created and{" "}
-              {stats.completedTasks} were completed.
-            </span>
+        {/* Task Activity Chart + Recent Employees */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+          {/* Task Activity Chart */}
+          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 mb-4">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-800">
+                Task Activity
+              </h2>
+              <span className="text-xs sm:text-sm text-gray-500">
+                Over the last seven days, {totalTasks} tasks were created and{" "}
+                {stats.completedTasks} were completed.
+              </span>
+            </div>
+            <div className="h-56 sm:h-64 lg:h-72">
+              <Bar data={chartData} />
+            </div>
           </div>
-          <div className="h-64">
-            <Bar data={chartData} />
-          </div>
-        </div>
 
-        {/* Recent Employees and Tasks */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Employees */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-800">
                 Recent employees
               </h2>
               <button
                 onClick={() => navigate("/employees")}
-                className="text-sm text-[#0f172b] hover:underline font-medium flex items-center gap-1"
+                className="text-xs sm:text-sm text-[#0f172b] hover:underline font-medium flex items-center gap-1 shrink-0"
               >
                 View all <ArrowRight className="w-3 h-3" />
               </button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-1.5 sm:space-y-2">
               {recentEmployees.map((emp: any) => (
                 <div
                   key={emp.id}
                   onClick={() => navigate(`/employees/${emp.id}`)}
-                  className="flex items-center justify-between p-2 hover:bg-[#f1f5f9] rounded-lg transition cursor-pointer"
+                  className="flex items-center justify-between gap-2 p-2 hover:bg-[#f1f5f9] rounded-lg transition cursor-pointer"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <img
                       src={
                         emp.avatar ||
                         `https://ui-avatars.com/api/?name=${emp.firstName}+${emp.lastName}&background=0f172b&color=fff`
                       }
                       alt={emp.firstName}
-                      className="w-10 h-10 rounded-full"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full shrink-0 object-cover"
                     />
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">
                         {emp.firstName} {emp.lastName}
                       </p>
-                      <p className="text-xs text-gray-500">{emp.position}</p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {emp.position}
+                      </p>
                     </div>
                   </div>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${
+                    className={`text-[11px] sm:text-xs px-2 py-1 rounded-full shrink-0 whitespace-nowrap ${
                       emp.status === "ACTIVE"
                         ? "bg-green-100 text-green-700"
                         : emp.status === "INACTIVE"
@@ -309,63 +326,61 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Recent Tasks */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Recent tasks
-              </h2>
-              <button
-                onClick={() => navigate("/tasks")}
-                className="text-sm text-[#0f172b] hover:underline font-medium flex items-center gap-1"
+        {/* Recent Tasks (full width) */}
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800">
+              Recent tasks
+            </h2>
+            <button
+              onClick={() => navigate("/tasks")}
+              className="text-xs sm:text-sm text-[#0f172b] hover:underline font-medium flex items-center gap-1 shrink-0"
+            >
+              View all <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-1.5 sm:gap-2">
+            {recentTasks.map((task: any) => (
+              <div
+                key={task.id}
+                onClick={() => navigate(`/tasks/${task.id}`)}
+                className="p-2 hover:bg-[#f1f5f9] rounded-lg transition cursor-pointer border border-transparent hover:border-gray-100"
               >
-                View all <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              {recentTasks.map((task: any) => (
-                <div
-                  key={task.id}
-                  onClick={() => navigate(`/tasks/${task.id}`)}
-                  className="p-2 hover:bg-[#f1f5f9] rounded-lg transition cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">
-                        {task.title}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                        <Calendar className="w-3 h-3" />
-                        <span>
-                          {new Date(task.dueDate).toLocaleDateString()}
-                        </span>
-                        {task.assignedTo && (
-                          <>
-                            <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                            <span>
-                              {task.assignedTo.firstName}{" "}
-                              {task.assignedTo.lastName}
-                            </span>
-                          </>
-                        )}
-                      </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-800 truncate">
+                      {task.title}
+                    </p>
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-gray-500 mt-0.5 flex-wrap">
+                      <Calendar className="w-3 h-3 shrink-0" />
+                      <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                      {task.assignedTo && (
+                        <>
+                          <span className="w-1 h-1 bg-gray-300 rounded-full shrink-0" />
+                          <span className="truncate">
+                            {task.assignedTo.firstName}{" "}
+                            {task.assignedTo.lastName}
+                          </span>
+                        </>
+                      )}
                     </div>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        task.status === "DONE"
-                          ? "bg-green-100 text-green-700"
-                          : task.status === "IN_PROGRESS"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {task.status}
-                    </span>
                   </div>
+                  <span
+                    className={`text-[11px] sm:text-xs px-2 py-1 rounded-full shrink-0 whitespace-nowrap ${
+                      task.status === "DONE"
+                        ? "bg-green-100 text-green-700"
+                        : task.status === "IN_PROGRESS"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {task.status}
+                  </span>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -374,9 +389,13 @@ const Dashboard = () => {
 
   // Employee dashboard
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-800">My Dashboard</h1>
-      <p className="text-gray-500 text-sm">Employee view coming soon...</p>
+    <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-0">
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+        My Dashboard
+      </h1>
+      <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
+        Employee view coming soon...
+      </p>
     </div>
   );
 };

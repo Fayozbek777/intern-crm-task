@@ -37,38 +37,31 @@ export interface CreateEmployeeData {
 }
 
 export const employeesApi = {
-  // Barcha xodimlarni olish
   getAll: async (params?: EmployeeFilters) => {
     const response = await api.get("/employees", { params });
     return response.data;
   },
 
-  // Bitta xodimni olish
-  // getById metodini yangilash
   getById: async (id: string) => {
     const response = await api.get(`/employees/${id}`);
-    return response.data.data; // taskStats bilan birga keladi
+    return response.data.data;
   },
 
-  // Xodim yaratish
   create: async (data: CreateEmployeeData) => {
     const response = await api.post("/employees", data);
     return response.data.data;
   },
 
-  // Xodimni tahrirlash
   update: async (id: string, data: Partial<CreateEmployeeData>) => {
     const response = await api.put(`/employees/${id}`, data);
     return response.data.data;
   },
 
-  // Xodimni o'chirish
   delete: async (id: string) => {
     const response = await api.delete(`/employees/${id}`);
     return response.data.data;
   },
 
-  // Assignable xodimlar (dropdown uchun)
   getAssignable: async () => {
     const response = await api.get("/employees/assignable");
     return response.data.data;
