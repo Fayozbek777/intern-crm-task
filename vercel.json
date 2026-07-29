@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "devCommand": "npm start",
+  "installCommand": "npm install",
+  "env": {
+    "REACT_APP_API_URL": "https://for-interns.vercel.app/api"
+  }
+}
