@@ -1,6 +1,18 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Allow: /
 
-# Sitemap
+Allow: /$
+Allow: /login
+
+Disallow: /dashboard
+Disallow: /employees
+Disallow: /tasks
+Disallow: /profile
+Disallow: /api/
+
+Disallow: %PUBLIC_URL%/manifest.json
+Disallow: *.js$
+Disallow: *.css$
+
+# Карта сайта
 Sitemap: https://intern-crm-task.vercel.app/sitemap.xml

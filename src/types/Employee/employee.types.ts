@@ -1,4 +1,3 @@
-// Employee tipiga taskStats qo'shamiz
 export interface Employee {
   id: string;
   firstName: string;

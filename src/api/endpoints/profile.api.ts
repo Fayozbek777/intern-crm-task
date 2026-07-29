@@ -29,19 +29,16 @@ export interface ChangePasswordData {
 }
 
 export const profileApi = {
-  // Profilni olish
   getProfile: async (): Promise<Profile> => {
     const response = await api.get("/profile");
     return response.data.data;
   },
 
-  // Profilni yangilash
   updateProfile: async (data: UpdateProfileData): Promise<Profile> => {
     const response = await api.put("/profile", data);
     return response.data.data;
   },
 
-  // Parolni o'zgartirish
   changePassword: async (
     data: ChangePasswordData,
   ): Promise<{ success: true }> => {
