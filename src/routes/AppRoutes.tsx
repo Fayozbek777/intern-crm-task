@@ -4,6 +4,7 @@ import Login from "../components/features/auth/Login";
 import Dashboard from "../components/features/dashboard/Dashboard";
 import Layout from "../components/common/Layout/Layout";
 import EmployeeList from "../components/features/Employees/EmployeesList";
+import TaskList from "../components/features/Tasks/TasksList";
 
 const AppRoutes = () => {
   return (
@@ -14,7 +15,7 @@ const AppRoutes = () => {
         <Route index element={<Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/employees" element={<EmployeeList />} />
-        <Route path="/tasks" element={<div className="p-8">Tasks Page</div>} />
+        <Route path="/tasks" element={<TaskList />} />
         <Route
           path="/profile"
           element={<div className="p-8">Profile Page</div>}
